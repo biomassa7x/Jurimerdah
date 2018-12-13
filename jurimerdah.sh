@@ -51,8 +51,8 @@ myDestinationDump="$myDestinationDir/$myDbName.sql"
 
 # First of all, some temporary items... ;-)
 
-timestamp=`date '+%Y-%m-%d_%H%M'`
-mkdir -p $myDestinationDir
+timestamp=`/bin/date '+%Y-%m-%d_%H%M'`
+/bin/mkdir -p $myDestinationDir
 
 # Let's do the job!
 #
@@ -62,9 +62,9 @@ for tempSource in "${mySource[@]}"
 do
 	if [ $mySshRemote == "yes" ]
 	then
-		rsync -Pav --delete -e "ssh -i $myIdRsa" --exclude=$myExclude $myUserId@$myHost:$tempSource $myDestinationDir/
+		/usr/bin/rsync -Pav --delete -e "ssh -i $myIdRsa" --exclude=$myExclude $myUserId@$myHost:$tempSource $myDestinationDir/
 	else
-		rsync -av --delete --exclude=$myExclude $tempSource $myDestinationDir/
+		/usr/bin/rsync -av --delete --exclude=$myExclude $tempSource $myDestinationDir/
 	fi
 done
 
@@ -74,9 +74,9 @@ then
 	rm -f $myDestinationDir/$myDbName.sql.bak*
 	if [ $mySshRemote == "yes" ]
 	then
-		ssh -i $myIdRsa $myUserId@$myHost "mysqldump -R -h $myDbHost -u $myDbUser -p$myDbPass $myDbName" > $myDestinationDir/$myDbName.sql.bak_$timestamp
+		/usr/bin/ssh -i $myIdRsa $myUserId@$myHost "mysqldump -R -h $myDbHost -u $myDbUser -p$myDbPass $myDbName" > $myDestinationDir/$myDbName.sql.bak_$timestamp
 	else
-		mysqldump -R -h $myDbHost -u $myDbUser -p$myDbPass $myDbName > $myDestinationDir/$myDbName.sql.bak_$timestamp
+		/usr/bin/mysqldump -R -h $myDbHost -u $myDbUser -p$myDbPass $myDbName > $myDestinationDir/$myDbName.sql.bak_$timestamp
 	fi
 fi
 
@@ -85,26 +85,25 @@ for tempSource in "${mySource[@]}"
 do
 	if [ $mySshRemote == "yes" ]
 	then
-		rsync -Pav --delete -e "ssh -i $myIdRsa" --exclude=$myExclude $myUserId@$myHost:$tempSource $myDestinationDir/
+		/usr/bin/rsync -Pav --delete -e "ssh -i $myIdRsa" --exclude=$myExclude $myUserId@$myHost:$tempSource $myDestinationDir/
 	else
-		rsync -av --delete --exclude=$myExclude $tempSource $myDestinationDir/
+		/usr/bin/rsync -av --delete --exclude=$myExclude $tempSource $myDestinationDir/
 	fi
 done
 
 # 4. Generate the archive and delete the old ones
 case "$myBackupType" in
 	daily|weekly|monthly)
-		tar cvfz $myBackupName.$myBackupType.bak_$timestamp.tar.gz $myDestinationDir
-		find $myBackupName.$myBackupType.bak_*.tar.gz -type f -mtime +$myBackupRetention -exec rm -f {} \;
+		/usr/bin/nice -n 10 /bin/tar cvfz $myBackupName.$myBackupType.bak_$timestamp.tar.gz $myDestinationDir
+		/usr/bin/find $myBackupName.$myBackupType.bak_*.tar.gz -type f -mtime +$myBackupRetention -exec rm -f {} \;
 		;;
 	*)
-		tar cvfz $myBackupName.bak_$timestamp.tar.gz $myDestinationDir
-		find $myBackupName.bak_*.tar.gz -type f -mtime +$myBackupRetention -exec rm -f {} \;
+		/usr/bin/nice -n 10 /bin/tar cvfz $myBackupName.bak_$timestamp.tar.gz $myDestinationDir
+		/usr/bin/find $myBackupName.bak_*.tar.gz -type f -mtime +$myBackupRetention -exec rm -f {} \;
 	   	;;
 esac
 
 # 5. Done
-echo "Done!"
+/bin/echo "Done!"
 
 exit 0
-
