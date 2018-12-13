@@ -13,7 +13,8 @@
 # - separated configuration file
 # - encrypt archive with a random generated password (sent by mail after backup)
 # - multiple db backup
-#
+# - direct backup to an archive instead of using of a temporary directory
+
 
 ##### Let's begin! #####
 
