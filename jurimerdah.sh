@@ -16,41 +16,18 @@
 # - direct backup to an archive instead of using of a temporary directory
 
 
-##### Let's begin! #####
+# Read the configuration file...
 
-# Define generic vars
+if [ -f ./jurimerdah.conf ]; then
+	. ./jurimerdah.conf
+else
+	echo "ERROR! No conf file found. Exiting..."
+	exit 2
+fi
 
-myBackupName="www.gamescollection.it"
-mySshRemote="yes"
-myBackupSQL="yes"
-myBackupType=""
-myBackupRetention="30"
+# First of all, some temporary items and other setting... ;-)
 
-# Define remote ssh host
-
-myHost="www.gamescollection.it"
-myUserId="gamescollection_web"
-myIdRsa="$HOME/.ssh/id_rsa.gamescollection"
-
-# Define data source(s)
-
-mySource=("wp-config.php" "www.gamescollection.it")
-myExclude="wp-snapshots"
-
-# Define source DB
-
-myDbHost="db.massaweb.com"
-myDbName="gc2017"
-myDbUser="gc2017dbuser"
-myDbPass="74VpYM7nSv"
-
-# Define destination directory
-
-myDestinationDir="backup"
 myDestinationDump="$myDestinationDir/$myDbName.sql"
-
-# First of all, some temporary items... ;-)
-
 timestamp=`/bin/date '+%Y-%m-%d_%H%M'`
 /bin/mkdir -p $myDestinationDir
 
@@ -58,10 +35,8 @@ timestamp=`/bin/date '+%Y-%m-%d_%H%M'`
 #
 
 # 1. Copy source to destination vi Rsync
-for tempSource in "${mySource[@]}"
-do
-	if [ $mySshRemote == "yes" ]
-	then
+for tempSource in "${mySource[@]}"; do
+	if [ $mySshRemote == "yes" ]; then
 		/usr/bin/rsync -Pav --delete -e "ssh -i $myIdRsa" --exclude=$myExclude $myUserId@$myHost:$tempSource $myDestinationDir/
 	else
 		/usr/bin/rsync -av --delete --exclude=$myExclude $tempSource $myDestinationDir/
@@ -69,11 +44,9 @@ do
 done
 
 # 2. Delete old dumps and do a new one
-if [ $myBackupSQL == "yes" ]
-then
+if [ $myBackupSQL == "yes" ]; then
 	rm -f $myDestinationDir/$myDbName.sql.bak*
-	if [ $mySshRemote == "yes" ]
-	then
+	if [ $mySshRemote == "yes" ]; then
 		/usr/bin/ssh -i $myIdRsa $myUserId@$myHost "mysqldump -R -h $myDbHost -u $myDbUser -p$myDbPass $myDbName" > $myDestinationDir/$myDbName.sql.bak_$timestamp
 	else
 		/usr/bin/mysqldump -R -h $myDbHost -u $myDbUser -p$myDbPass $myDbName > $myDestinationDir/$myDbName.sql.bak_$timestamp
@@ -81,10 +54,8 @@ then
 fi
 
 # 3. Re-Sync source -> destination with new files generated during the DB dump procedure
-for tempSource in "${mySource[@]}"
-do
-	if [ $mySshRemote == "yes" ]
-	then
+for tempSource in "${mySource[@]}"; do
+	if [ $mySshRemote == "yes" ]; then
 		/usr/bin/rsync -Pav --delete -e "ssh -i $myIdRsa" --exclude=$myExclude $myUserId@$myHost:$tempSource $myDestinationDir/
 	else
 		/usr/bin/rsync -av --delete --exclude=$myExclude $tempSource $myDestinationDir/
