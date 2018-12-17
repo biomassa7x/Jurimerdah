@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 # jurimerdah.sh
-# alpha version 0.1 build 201812111706
+# alpha version
 # (c)2018 Biomassa (F.G.Massa) - biomassa@gmail.com
 # 
 # Description:
@@ -15,6 +15,23 @@
 # - multiple db backup
 # - direct backup to an archive instead of using of a temporary directory
 
+# Get options from command line BETA
+while getopts ":c:h" arg; do
+	case $arg in
+		h)
+			echo "Usage:"
+			exit 0
+			;;
+		c)
+			thisCliConfigFile=$OPTARG
+			echo "New config file -> $thisCliConfigFile"
+			;;
+		:)
+			echo "${OPTARG} requires an argument";
+			exit 2;
+			;;
+	esac
+done			
 
 # Read the configuration file...
 
@@ -24,6 +41,9 @@ else
 	echo "ERROR! No conf file found. Exiting..."
 	exit 2
 fi
+
+echo "All done"
+exit 0;
 
 # First of all, some temporary items and other setting... ;-)
 
